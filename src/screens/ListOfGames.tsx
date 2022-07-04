@@ -39,23 +39,29 @@ const ListOfGames: FC = () => {
 
   const joinUser1 = (a: any) => {
     const userId = authentication.currentUser?.uid;
+    var userName1 = '';
+    onValue(ref(database, '/markers/' + a), (snapshot) => {
+      const userName = (snapshot.val() && snapshot.val().userName1) || '';
+      userName1 = userName;
+    })
 
-    update(ref(database, '/listOfGame/' + a), {
-      user1: userId,
-      table: a,
-      userName1: userNameCek
-    });
-    update(ref(database, '/users/' + userId), {
-      table: a,
-      userNumber: 'user1'
-    });
-    update(ref(database, '/markers/' + a), {
-      user1: userId,
-      userName1: userNameCek
-    });
-    navigation.navigate('Game')
-  };
-
+    if (userName1 === '') {
+      update(ref(database, '/listOfGame/' + a), {
+        user1: userId,
+        table: a,
+        userName1: userNameCek
+      });
+      update(ref(database, '/users/' + userId), {
+        table: a,
+        userNumber: 'user1'
+      });
+      update(ref(database, '/markers/' + a), {
+        user1: userId,
+        userName1: userNameCek
+      });
+      navigation.navigate('Game')
+    }
+  }
 
   const joinUser2 = async (a: any) => {
     const userId = authentication.currentUser?.uid;
