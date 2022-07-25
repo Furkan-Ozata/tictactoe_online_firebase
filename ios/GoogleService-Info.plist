@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>243999653864-b21p8brfb8mk8ledi3vmskfq5rf7i57j.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.243999653864-b21p8brfb8mk8ledi3vmskfq5rf7i57j</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>243999653864-p6f6hnbokgdcsbabi7umiv7b8fe3ft3s.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDwVThW3MTVlSiEZh3qYHehxc9p46Qqi6U</string>
+	<key>GCM_SENDER_ID</key>
+	<string>243999653864</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.reactjs.native.example.TicTacToeFirest</string>
+	<key>PROJECT_ID</key>
+	<string>tic-tac-toe-ee50e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tic-tac-toe-ee50e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:243999653864:ios:1c85debade57d74d0b6e5d</string>
+	<key>DATABASE_URL</key>
+	<string>https://tic-tac-toe-ee50e-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>

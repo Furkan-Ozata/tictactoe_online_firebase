@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "243999653864",
+    "firebase_url": "https://tic-tac-toe-ee50e-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "tic-tac-toe-ee50e",
+    "storage_bucket": "tic-tac-toe-ee50e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243999653864:android:3f5a7ac2c447a3470b6e5d",
+        "android_client_info": {
+          "package_name": "com.tictactoefirest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243999653864-cb3d8fmqkvc50ujs96g28tc25eqgr9ah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd2eqPC6Hg-j3yCWoAXNN-6fy_Vnmjel8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "243999653864-cb3d8fmqkvc50ujs96g28tc25eqgr9ah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "243999653864-13lhusi1066slb312okroumvppdc943j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.TicTacToeFirestore"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
