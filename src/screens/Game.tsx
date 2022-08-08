@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {Component} from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,200 +12,70 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import {inject, observer} from 'mobx-react';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackParams} from '../navigation/stackPramsType';
+import {
+  deleteTable,
+  markPosition,
+  resetMarkers,
+} from '../firebaseFunctions/gameFunctions';
 
+const navigation = useNavigation<NativeStackNavigationProp<StackParams>>();
 const windowWidth = Dimensions.get('window').width;
+
 let TableID: any = undefined;
-const Game = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<StackParams>>();
+@inject('store')
+@observer
+export default class Game extends Component {
+  constructor(props: any) {
+    super(props);
+    this.state = {};
+  }
 
-  const [active_player, setActive_player] = useState('X');
-  const [markers, setMarkers] = useState(['', '', '', '', '', '', '', '', '']);
-
-  // read instant data
-  useEffect(() => {
-    const temp = ['', '', '', '', '', '', '', '', ''];
+  async componentDidMount() {
     const {currentUser} = auth();
     const {uid} = currentUser;
-    var historiesMap: any = undefined;
-    var getTable: any = undefined;
-
-    setTimeout(() => {  fetchData() }, 1000);
-    async function fetchData() {
-      // You can await here
-      const response = await firestore()
-        .collection('Users')
-        .doc(uid)
-        .get()
-        .then(history => {
-          if (history.exists) {
-            const historyData = history.data();
-            TableID = historyData.tableID;
-          }
-          var data: any = {temp: ['', '', '', '', '', '', '', '', '']};
-          firestore()
-            .collection('markers')
-            .doc(TableID)
-            .onSnapshot(documentSnapshot => {
-              data = documentSnapshot.data();
-
-              if (data !== undefined) {
-                setMarkers(data.temp);
-                setActive_player(data.sira);
-              }
-            });
-        })
-        .catch(err => console.log(err));
-    }
-
-
-    // Stop listening for updates when no longer required
-  }, []);
-
-  const markPosition = (position: any) => {
-    const {currentUser} = auth();
-    const {uid} = currentUser;
-    let tableGet: any = null;
-    let sira: any = null;
-    async function fetchData() {
-      await firestore()
-        .collection('Users')
-        .doc(uid)
-        .get()
-        .then(history => {
-          if (history.exists) {
-            const historyData: any = history.data();
-            tableGet = historyData.tableID;
-            sira = historyData.sira;
-          }
-          getMarkers();
-        })
-        .catch(err => console.log(err));
-    }
-    fetchData();
-    function getMarkers() {
-      if (active_player === 'X') {
-        if (uid === TableID) {
-          if (!markers[position]) {
-            let temp: any = [...markers];
-            temp[position] = active_player;
-            //set marker firestore
-            firestore()
-              .collection('markers')
-              .doc(tableGet)
-              .set({
-                temp: temp,
-                sira: 'O',
-              })
-              .then(() => {
-                console.log('markers added!');
-              });
-
-            setMarkers(temp);
-            setActive_player('O');
-          }
+    await firestore()
+      .collection('Users')
+      .doc(uid)
+      .get()
+      .then(history => {
+        if (history.exists) {
+          const historyData = history.data();
+          TableID = historyData.tableID;
         }
-      } else if (active_player === 'O') {
-        if (uid !== TableID) {
-          if (!markers[position]) {
-            let temp: any = [...markers];
-            temp[position] = active_player;
-            //set marker firestore
-            firestore()
-              .collection('markers')
-              .doc(tableGet)
-              .set({
-                temp: temp,
-                sira: 'X',
-              })
-              .then(() => {
-                console.log('markers added!');
-              });
+      })
+      .catch(err => console.log(err));
+    var data: any = null;
+    firestore()
+      .collection('listOfGames')
+      .doc(TableID)
+      .onSnapshot(documentSnapshot => {
+        data = documentSnapshot.data();
 
-            setMarkers(temp);
-
-            setActive_player('X');
-          }
+        if (data !== undefined) {
+          this.props.store.markers = data.temp;
+          this.props.store.active_player = data.sira;
         }
-      }
-    }
-  };
-  const deleteTable = () => {
-    const {currentUser} = auth();
-    const {uid} = currentUser;
-    let tableGet: any = null;
-    let sira: any = null;
-    async function fetchData() {
-      await firestore()
-        .collection('Users')
-        .doc(uid)
-        .get()
-        .then(history => {
-          if (history.exists) {
-            const historyData: any = history.data();
-            tableGet = historyData.tableID;
-          }
-          getMarkers();
-        })
-        .catch(err => console.log(err));
-    }
-    fetchData()
-    function getMarkers() {
-      if (uid === tableGet) {
-        console.log(tableGet)
-        firestore().collection('listOfGames').doc(tableGet).delete().then(() => {
-          firestore().collection('markers').doc(tableGet).delete()
+      });
+  }
 
-        }
-         
-        );
-      }
-    }
-    
-    navigation.navigate('GameCreate')
-  };
-  const resetMarkers = () => {
-    const temp = ['', '', '', '', '', '', '', '', ''];
-    //reset firestore markers
-    const {currentUser} = auth();
-    const {uid} = currentUser;
-    let tableGet: any = null;
-    let sira: any = null;
-    async function fetchData() {
-      await firestore()
-        .collection('Users')
-        .doc(uid)
-        .get()
-        .then(history => {
-          if (history.exists) {
-            const historyData: any = history.data();
-            tableGet = historyData.tableID;
-          }
-          getMarkers();
-        })
-        .catch(err => console.log(err));
-    }
-    fetchData();
-    function getMarkers() {
-      firestore()
-        .collection('markers')
-        .doc(tableGet)
-        .set({
-          temp: temp,
-          sira: 'X',
-        })
-        .then(() => {
-          console.log('markers added!');
-        });
-    }
-    // reset markers
-    setMarkers(temp);
-    setActive_player('X');
+  markPositionGet = (position: any) => {
+    markPosition(position, TableID);
   };
 
-  const calculateWinner = (squares: any) => {
+  deleteTableGet = () => {
+    deleteTable();
+    navigation.navigate('GameCreate');
+  };
+
+  resetMarkersGet = () => {
+     resetMarkers();
+  };
+
+  calculateWinner = (squares: any) => {
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -229,49 +99,56 @@ const Game = () => {
     return null;
   };
 
-  useEffect(() => {
-    const winner = calculateWinner(markers);
+  winnerFunc() {
+    const winner = this.calculateWinner(this.props.store.markers);
     if (winner === 'X') {
       Alert.alert('Player X Won!');
-      resetMarkers();
+       this.resetMarkersGet();
     } else if (winner === 'O') {
       Alert.alert('Player O Won!');
-      resetMarkers();
+      this.resetMarkersGet();
     }
-  }, [markers]);
-  return (
-    
+  }
+
+  render() {
+    this.winnerFunc();
+    return (
       <SafeAreaView style={styles.body}>
-          <View>
-        <TouchableOpacity
-          onPress={() => {
-            deleteTable();
-          }}>
-          <Image
-            source={require('../assets/img/BACK.png')}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-      </View>
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              this.deleteTableGet();
+            }}>
+            <Image
+              source={require('../assets/img/BACK.png')}
+              style={styles.backIcon}
+            />
+          </TouchableOpacity>
+        </View>
         <View
           style={[
             styles.playerInfo,
-            {backgroundColor: active_player === 'X' ? '#FF0045' : '#009FF9'},
+            {
+              backgroundColor:
+                this.props.store.active_player === 'X' ? '#FF0045' : '#009FF9',
+            },
           ]}>
-          <Text style={styles.playerTxt}>Player {active_player}'s turn</Text>
+          <Text style={styles.playerTxt}>
+            Player {this.props.store.active_player}'s turn
+          </Text>
         </View>
         <View style={styles.mainContainer}>
           {/* Top Left Cell */}
           <Pressable
             style={styles.cell_top_left}
-            onPress={() => markPosition(0)}>
-            {markers[0] === 'X' && (
+            onPress={() => this.markPositionGet(0)}>
+            {this.props.store.markers[0] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[0] === 'O' && (
+            {this.props.store.markers[0] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -282,14 +159,14 @@ const Game = () => {
           {/* Top Mid Cell */}
           <Pressable
             style={styles.cell_top_mid}
-            onPress={() => markPosition(1)}>
-            {markers[1] === 'X' && (
+            onPress={() => this.markPositionGet(1)}>
+            {this.props.store.markers[1] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[1] === 'O' && (
+            {this.props.store.markers[1] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -300,14 +177,14 @@ const Game = () => {
           {/* Top Right Cell */}
           <Pressable
             style={styles.cell_top_right}
-            onPress={() => markPosition(2)}>
-            {markers[2] === 'X' && (
+            onPress={() => this.markPositionGet(2)}>
+            {this.props.store.markers[2] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[2] === 'O' && (
+            {this.props.store.markers[2] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -318,14 +195,14 @@ const Game = () => {
           {/* Mid Left Cell */}
           <Pressable
             style={styles.cell_mid_left}
-            onPress={() => markPosition(3)}>
-            {markers[3] === 'X' && (
+            onPress={() => this.markPositionGet(3)}>
+            {this.props.store.markers[3] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[3] === 'O' && (
+            {this.props.store.markers[3] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -336,14 +213,14 @@ const Game = () => {
           {/* Mid Mid Cell */}
           <Pressable
             style={styles.cell_mid_mid}
-            onPress={() => markPosition(4)}>
-            {markers[4] === 'X' && (
+            onPress={() => this.markPositionGet(4)}>
+            {this.props.store.markers[4] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[4] === 'O' && (
+            {this.props.store.markers[4] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -354,14 +231,14 @@ const Game = () => {
           {/* Mid Right Cell */}
           <Pressable
             style={styles.cell_mid_right}
-            onPress={() => markPosition(5)}>
-            {markers[5] === 'X' && (
+            onPress={() => this.markPositionGet(5)}>
+            {this.props.store.markers[5] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[5] === 'O' && (
+            {this.props.store.markers[5] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -372,14 +249,14 @@ const Game = () => {
           {/* Bottom Left Cell */}
           <Pressable
             style={styles.cell_bottom_left}
-            onPress={() => markPosition(6)}>
-            {markers[6] === 'X' && (
+            onPress={() => this.markPositionGet(6)}>
+            {this.props.store.markers[6] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[6] === 'O' && (
+            {this.props.store.markers[6] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -390,14 +267,14 @@ const Game = () => {
           {/* Bottom Mid Cell */}
           <Pressable
             style={styles.cell_bottom_mid}
-            onPress={() => markPosition(7)}>
-            {markers[7] === 'X' && (
+            onPress={() => this.markPositionGet(7)}>
+            {this.props.store.markers[7] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[7] === 'O' && (
+            {this.props.store.markers[7] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -408,14 +285,14 @@ const Game = () => {
           {/* Bottom Right Cell */}
           <Pressable
             style={styles.cell_bottom_right}
-            onPress={() => markPosition(8)}>
-            {markers[8] === 'X' && (
+            onPress={() => this.markPositionGet(8)}>
+            {this.props.store.markers[8] === 'X' && (
               <Image
                 source={require('../assets/img/XICON.png')}
                 style={styles.icon}
               />
             )}
-            {markers[8] === 'O' && (
+            {this.props.store.markers[8] === 'O' && (
               <Image
                 source={require('../assets/img/OICON.png')}
                 style={styles.icon}
@@ -423,17 +300,16 @@ const Game = () => {
             )}
           </Pressable>
         </View>
-        <Pressable style={styles.cancleBTN} onPress={resetMarkers}>
+        <Pressable style={styles.cancleBTN} onPress={this.resetMarkersGet}>
           <Image
             source={require('../assets/img/REPLAY.png')}
             style={styles.cancelIcon}
           />
         </Pressable>
       </SafeAreaView>
-  );
-};
-
-export default Game;
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   body: {
@@ -541,7 +417,7 @@ const styles = StyleSheet.create({
   cancleBTN: {
     position: 'absolute',
     bottom: 20,
-    right: 20
+    right: 20,
   },
   cancelIcon: {
     height: 80,

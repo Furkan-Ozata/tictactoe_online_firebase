@@ -1,73 +1,49 @@
-import React, {FC, useState} from 'react';
-import {ScrollView, View, Text, StyleSheet, Image} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import React, {Component} from 'react';
+import {ScrollView, View, StyleSheet, Image} from 'react-native';
 import {Button, CreateButton} from '../components';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackParams} from '../navigation/stackPramsType';
-import firestore from '@react-native-firebase/firestore';
+import {createGame, signout} from '../firebaseFunctions/gameCreate';
 
+const navigation = useNavigation<NativeStackNavigationProp<StackParams>>();
 
+export default class GameCreate extends Component {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+    };
+  }
 
-const GameCreate: FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<StackParams>>();
-
-  const signout = () => {
-    auth()
-      .signOut()
-      .then(() => console.log('User signed out!'));
+  signoutGet = () => {
+    signout();
   };
 
-  const createGame = () => {
-    const {currentUser} = auth();
-    const {uid} = currentUser;
-    const temp = ['', '', '', '', '', '', '', '', ''];
-    firestore()
-      .collection('listOfGames')
-      .doc(uid)
-      .set({
-        user1: uid,
-        createdAt: firestore.FieldValue.serverTimestamp(),
-        tableID: uid,
-      })
-      .then(() => {
-        firestore()
-          .collection('markers')
-          .doc(uid)
-          .set({
-            user1: uid,
-            createdAt: firestore.FieldValue.serverTimestamp(),
-            temp: temp,
-            sira: 'X',
-            user2: null
-          })
-          .then(() => {
-            firestore().collection('Users').doc(uid).update({
-              user: uid,
-              sira: 'X',
-              tableID: uid,
-            });
-          });
-      });
-
+  createGameGet = async () => {
+    createGame();
     navigation.navigate('Game');
   };
 
-  const ListOfGames = () => {
+  ListOfGames = () => {
     navigation.navigate('ListOfGames');
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.iconContainer}>
-        <Image style={styles.icon} source={require('../assets/img/LOGO.png')} />
-      </View>
-      <CreateButton onPress={createGame} title={'Create Game'} />
-      <CreateButton onPress={ListOfGames} title={'List Of Games'} />
-      <Button onPress={signout} title={'Sign Out'} />
-    </ScrollView>
-  );
-};
+  render() {
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.iconContainer}>
+          <Image
+            style={styles.icon}
+            source={require('../assets/img/LOGO.png')}
+          />
+        </View>
+        <CreateButton onPress={this.createGameGet} title={'Create Game'} />
+        <CreateButton onPress={this.ListOfGames} title={'List Of Games'} />
+        <Button onPress={this.signoutGet} title={'Sign Out'} />
+      </ScrollView>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -85,5 +61,3 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
-
-export default GameCreate;
